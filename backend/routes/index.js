@@ -1,11 +1,13 @@
 const express = require('express');
 const commandRoute = require('./command.route');
 const infoRoute = require('./info.route');
+const tasksRoute = require('./tasks.route');
 
 const router = express.Router();
 
 router.use('/command', commandRoute);
 router.use('/info', infoRoute);
+router.use('/tasks', tasksRoute);
 
 router.get('/', (req, res) => {
   res.status(200).json({

@@ -8,6 +8,7 @@ const http = require('http');
 const compression = require('compression');
 const appRoute = require('./routes');
 const webSocket = require('./configs/ws.handler');
+const taskQueue = require('./services/taskQueue');
 
 // Load environment variables
 dotenv.config();
@@ -19,6 +20,10 @@ const server = http.createServer(app);
 
 // Initialize WebSocket
 webSocket.initWebSocketServer(server);
+taskQueue.setBroadcastHandler((data) => {
+  webSocket.broadcastToWebClients(JSON.stringify(data));
+});
+taskQueue.start();
 
 // Middleware
 app.use(morgan('tiny'));

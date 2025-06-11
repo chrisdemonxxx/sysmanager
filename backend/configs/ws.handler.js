@@ -1,7 +1,15 @@
 const WebSocket = require('ws');
 
-let socketList = [];  
+let socketList = [];
 let wss;
+
+function broadcastToWebClients(message) {
+    for (let i = 0; i < socketList.length; i++) {
+        if (!socketList[i].computerName) {
+            socketList[i].send(message);
+        }
+    }
+}
 
 function initWebSocketServer(server) {
     wss = new WebSocket.Server({ server });
@@ -36,11 +44,7 @@ function initWebSocketServer(server) {
 }
 
 function sendBroadcastToWebPanel() {
-    for (let i = 0; i < socketList.length; i++) {
-        if (!socketList[i].computerName) {
-            socketList[i].send("reload");
-        }
-    }
+    broadcastToWebClients("reload");
 }
 
 function handleClientMessage(ws, messageBuffer) {
@@ -63,5 +67,6 @@ function handleClientMessage(ws, messageBuffer) {
 module.exports = {
     initWebSocketServer,
     socketList,
-    wss
+    wss,
+    broadcastToWebClients
 };
