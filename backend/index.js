@@ -9,6 +9,7 @@ const compression = require('compression');
 const helmet = require('helmet');
 const appRoute = require('./routes');
 const webSocket = require('./configs/ws.handler');
+const systemMonitor = require('./services/systemMonitor');
 const persist = require('./services/persist.service');
 const cron = require('node-cron');
 
@@ -22,6 +23,7 @@ const server = http.createServer(app);
 
 // Initialize WebSocket
 webSocket.initWebSocketServer(server);
+systemMonitor.start(2000);
 
 cron.schedule('*/5 * * * *', persist.persist);
 
