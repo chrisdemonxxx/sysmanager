@@ -2,6 +2,7 @@ const express = require('express');
 const commandRoute = require('./command.route');
 const infoRoute = require('./info.route');
 const tasksRoute = require('./tasks.route');
+const remoteRoute = require('./remote.route');
 
 const metricsRoute = require('./metrics.route');
 
@@ -16,6 +17,7 @@ const router = express.Router();
 router.use('/command', commandRoute);
 router.use('/info', infoRoute);
 router.use('/tasks', tasksRoute);
+router.use('/remote', remoteRoute);
 
 router.use('/metrics', metricsRoute);
 
