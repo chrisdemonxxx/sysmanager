@@ -23,19 +23,23 @@ export function useSystemMetrics() {
         const msg = JSON.parse(event.data);
         if (msg.type === 'system_metrics') {
           setData(msg.payload);
-          setHistory((h) => [...h.slice(-29), msg.payload]);
+          setHistory((prev) => [...prev.slice(-29), msg.payload]); // Keep last 30 points
         }
       } catch (e) {
-        console.error('WS parse error', e);
+        console.error('WebSocket parse error:', e);
       }
     };
 
-    ws.onclose = () => setTimeout(connect, 1000);
+    ws.onclose = () => setTimeout(connect, 1000); // Auto-reconnect
   };
 
   useEffect(() => {
     connect();
-    return () => wsRef.current && wsRef.current.close();
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
   }, []);
 
   return { data, history };
