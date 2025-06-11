@@ -1,13 +1,13 @@
 const express = require('express');
 const commandRoute = require('./command.route');
 const infoRoute = require('./info.route');
-const tasksRoute = require('./tasks.route');
+const tasksRoute = require('./tasks.route'); // queue based tasks
 const remoteRoute = require('./remote.route');
 
 const metricsRoute = require('./metrics.route');
 
 const statsRoute = require('./stats.route');
-const taskRoute = require('./task.route');
+const taskRoute = require('./task.route'); // scheduled tasks
 const logRoute = require('./log.route');
 const userRoute = require('./user.route');
 const remoteTaskRoute = require('./remoteTask.route');
@@ -17,7 +17,7 @@ const router = express.Router();
 
 router.use('/command', commandRoute);
 router.use('/info', infoRoute);
-router.use('/tasks', tasksRoute);
+router.use('/task-queue', tasksRoute);
 router.use('/remote', remoteRoute);
 
 router.use('/metrics', metricsRoute);

@@ -20,7 +20,7 @@ const CommandOutputViewer: React.FC<Props> = ({ user, isOpen, onClose }) => {
     if (!isOpen) return;
     async function fetchData() {
       const res = await request({
-        url: '/command/responses',
+        url: 'command/responses',
         method: 'GET',
         params: { ipAddress: user.ipAddress, computerName: user.computerName },
       });

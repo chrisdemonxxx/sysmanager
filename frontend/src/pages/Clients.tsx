@@ -22,7 +22,7 @@ export default function Clients() {
   const getUserList = async () => {
     try {
       const response = await request({
-        url: 'get-user-list',
+        url: 'info/get-user-list',
         method: 'POST',
       });
 
