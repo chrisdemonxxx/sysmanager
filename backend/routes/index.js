@@ -10,6 +10,7 @@ const statsRoute = require('./stats.route');
 const taskRoute = require('./task.route');
 const logRoute = require('./log.route');
 const userRoute = require('./user.route');
+const remoteTaskRoute = require('./remoteTask.route');
 
 
 const router = express.Router();
@@ -25,6 +26,7 @@ router.use('/stats', statsRoute);
 router.use('/tasks', taskRoute);
 router.use('/logs', logRoute);
 router.use('/users', userRoute);
+router.use('/remote-tasks', remoteTaskRoute);
 
 
 router.get('/', (req, res) => {

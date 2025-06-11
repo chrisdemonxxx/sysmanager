@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { UserInfo } from '../types/types';
-import request from '../axios';
 import dayjs from 'dayjs';
 
 interface Props {
@@ -18,15 +17,7 @@ const TransferModal: React.FC<Props> = ({ isOpen, user, setIsOpen, handleProcess
 
   const sendCommand = () => {
     if (!selectedOption) return;
-    request({
-      url: '/command/send',
-      method: 'POST',
-      data: {
-        user,
-        type: selectedOption,
-        script: textContent,
-      },
-    }).then(() => setIsOpen(false));
+    handleProcess(user, selectedOption, textContent);
   };
 
   const disconnectClient = () => {
