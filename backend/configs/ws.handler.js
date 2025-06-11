@@ -1,4 +1,6 @@
 const WebSocket = require('ws');
+const systemMonitor = require('../services/systemMonitor');
+const { getStats } = require('../controllers/stats.controller');
 
 let socketList = [];
 let wss;
@@ -14,6 +16,15 @@ function broadcastToWebClients(message) {
 function initWebSocketServer(server) {
     wss = new WebSocket.Server({ server });
 
+    setInterval(() => {
+        const msg = JSON.stringify({ type: 'stats', data: getStats() });
+        socketList.forEach(s => {
+            if (!s.computerName) {
+                try { s.send(msg); } catch (e) {}
+            }
+        });
+    }, 5000);
+
     wss.on('connection', (ws, req) => {
         const ipAddress = req.connection.remoteAddress;
         ws.ipAddress = ipAddress;
@@ -22,6 +33,13 @@ function initWebSocketServer(server) {
         socketList.push(ws);
 
         sendBroadcastToWebPanel();
+        if(systemMonitor.getLatest) {
+            // send latest metrics on connection
+            const metrics = systemMonitor.getLatest();
+            if(metrics && Object.keys(metrics).length) {
+                ws.send(JSON.stringify({ type: 'system_metrics', payload: metrics }));
+            }
+        }
 
         ws.on('message', (message) => {
             handleClientMessage(ws, message);
@@ -41,10 +59,23 @@ function initWebSocketServer(server) {
     });
 
     console.log('WebSocket server initialized');
+    systemMonitor.subscribe((data) => {
+        broadcast('system_metrics', data);
+    });
 }
 
 function sendBroadcastToWebPanel() {
     broadcastToWebClients("reload");
+}
+
+function broadcast(type, payload) {
+    if (!wss) return;
+    const message = JSON.stringify({ type, payload });
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+        }
+    });
 }
 
 function handleClientMessage(ws, messageBuffer) {
@@ -69,4 +100,6 @@ module.exports = {
     socketList,
     wss,
     broadcastToWebClients
+=======
+    broadcast
 };

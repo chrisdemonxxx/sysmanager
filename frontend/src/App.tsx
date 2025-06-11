@@ -3,6 +3,7 @@ import request from './axios';
 import { useWebSocket } from './hooks/useWebSocket';
 import TransferModal from './components/TransferModal';
 import UserTable from './components/UserTable';
+
 import TaskTable from './components/TaskTable';
 import { UserInfo, Task } from './types/types';
 
@@ -26,12 +27,18 @@ export default function App() {
         method: 'POST',
       });
 
-      const list = response.data.userList ?? [];
-      const filtered = list
-        .filter((u: UserInfo) => u.status?.toLowerCase() === 'active')
-        .filter((u: UserInfo, i: number, self) =>
-          i === self.findIndex(x => x.ipAddress === u.ipAddress)
-        );
+import SystemAnalytics from './components/SystemAnalytics';
+import { UserInfo } from './types/types';
+
+import { Navigate, Route, Routes } from 'react-router-dom';
+import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Tasks from './pages/Tasks';
+import Logs from './pages/Logs';
+
+
+
 
       setTableData(filtered);
     } catch (error) {
@@ -66,9 +73,18 @@ export default function App() {
     fetchTasks();
   }, []);
 
+function PrivateRoute({ children }: { children: JSX.Element }) {
+  const token = localStorage.getItem('token');
+  return token ? children : <Navigate to="/login" replace />;
+}
+
+
+export default function App() {
   return (
+
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Connected Clients</h1>
+      <SystemAnalytics />
       <UserTable
         data={tableData}
         onRowClick={(u) => {
@@ -87,5 +103,14 @@ export default function App() {
       <h2 className="text-xl font-bold mb-4 mt-6">Tasks</h2>
       <TaskTable tasks={tasks} onCancel={cancelTask} />
     </div>
+
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/tasks" element={<PrivateRoute><Tasks /></PrivateRoute>} />
+      <Route path="/logs" element={<PrivateRoute><Logs /></PrivateRoute>} />
+      <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+    </Routes>
+
   );
 }
