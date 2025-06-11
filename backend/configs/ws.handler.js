@@ -99,7 +99,6 @@ module.exports = {
     initWebSocketServer,
     socketList,
     wss,
-    broadcastToWebClients
-=======
+    broadcastToWebClients,
     broadcast
 };
