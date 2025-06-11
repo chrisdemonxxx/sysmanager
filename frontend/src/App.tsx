@@ -25,7 +25,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Protected Routes under Layout */}
+      {/* Protected Routes under shared Layout */}
       <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
         <Route index element={<Dashboard />} />
         <Route path="tasks" element={<Tasks />} />
