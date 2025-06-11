@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
 const systemMonitor = require('../services/systemMonitor');
 const { getStats } = require('../controllers/stats.controller');
+const commandConsole = require('../services/commandConsole');
 
 let socketList = [];
 let offlineClients = [];
@@ -54,7 +55,6 @@ function initWebSocketServer(server) {
         ws.lastActiveTime = new Date();
 
         socketList.push(ws);
-
         sendBroadcastToWebPanel();
 
         if (systemMonitor.getLatest) {
@@ -116,8 +116,17 @@ function handleClientMessage(ws, messageBuffer) {
 
     const result = stringMessage.split("sep-x8jmjgfmr9");
 
-    if (result[0] === "FROM_WIN_CLIENT" && result[1] === "CS_SEND_COMPUTERNAME") {
-        ws.computerName = result[2];
+    if (result[0] === "FROM_WIN_CLIENT") {
+        if (result[1] === "CS_SEND_COMPUTERNAME") {
+            ws.computerName = result[2];
+        } else if (result[1] === "COMMAND_RESULT") {
+            try {
+                const output = Buffer.from(result[2], 'base64').toString('utf8');
+                commandConsole.addResponse(ws.ipAddress, ws.computerName, output);
+            } catch (e) {
+                console.error('Failed to decode command result', e);
+            }
+        }
     }
 }
 
