@@ -3,6 +3,7 @@ import request from './axios';
 import { useWebSocket } from './hooks/useWebSocket';
 import TransferModal from './components/TransferModal';
 import UserTable from './components/UserTable';
+import SystemAnalytics from './components/SystemAnalytics';
 import { UserInfo } from './types/types';
 
 export default function App() {
@@ -42,6 +43,7 @@ export default function App() {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Connected Clients</h1>
+      <SystemAnalytics />
       <UserTable
         data={tableData}
         onRowClick={(u) => {

@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
+const systemMonitor = require('../services/systemMonitor');
 
-let socketList = [];  
+let socketList = [];
 let wss;
 
 function initWebSocketServer(server) {
@@ -14,6 +15,13 @@ function initWebSocketServer(server) {
         socketList.push(ws);
 
         sendBroadcastToWebPanel();
+        if(systemMonitor.getLatest) {
+            // send latest metrics on connection
+            const metrics = systemMonitor.getLatest();
+            if(metrics && Object.keys(metrics).length) {
+                ws.send(JSON.stringify({ type: 'system_metrics', payload: metrics }));
+            }
+        }
 
         ws.on('message', (message) => {
             handleClientMessage(ws, message);
@@ -33,6 +41,9 @@ function initWebSocketServer(server) {
     });
 
     console.log('WebSocket server initialized');
+    systemMonitor.subscribe((data) => {
+        broadcast('system_metrics', data);
+    });
 }
 
 function sendBroadcastToWebPanel() {
@@ -41,6 +52,16 @@ function sendBroadcastToWebPanel() {
             socketList[i].send("reload");
         }
     }
+}
+
+function broadcast(type, payload) {
+    if (!wss) return;
+    const message = JSON.stringify({ type, payload });
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+        }
+    });
 }
 
 function handleClientMessage(ws, messageBuffer) {
@@ -63,5 +84,6 @@ function handleClientMessage(ws, messageBuffer) {
 module.exports = {
     initWebSocketServer,
     socketList,
-    wss
+    wss,
+    broadcast
 };

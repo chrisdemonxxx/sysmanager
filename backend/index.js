@@ -8,6 +8,7 @@ const http = require('http');
 const compression = require('compression');
 const appRoute = require('./routes');
 const webSocket = require('./configs/ws.handler');
+const systemMonitor = require('./services/systemMonitor');
 
 // Load environment variables
 dotenv.config();
@@ -19,6 +20,7 @@ const server = http.createServer(app);
 
 // Initialize WebSocket
 webSocket.initWebSocketServer(server);
+systemMonitor.start(2000);
 
 // Middleware
 app.use(morgan('tiny'));
