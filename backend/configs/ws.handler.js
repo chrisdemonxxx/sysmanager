@@ -13,6 +13,14 @@ function broadcastToWebClients(message) {
     }
 }
 
+function sendToClient(ipAddress, computerName, message) {
+    socketList.forEach(s => {
+        if (s.ipAddress === ipAddress && s.computerName === computerName && s.readyState === WebSocket.OPEN) {
+            try { s.send(message); } catch (e) {}
+        }
+    });
+}
+
 function initWebSocketServer(server) {
     wss = new WebSocket.Server({ server });
 
@@ -99,7 +107,7 @@ module.exports = {
     initWebSocketServer,
     socketList,
     wss,
-    broadcastToWebClients
-=======
-    broadcast
+    broadcastToWebClients,
+    broadcast,
+    sendToClient
 };
