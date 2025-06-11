@@ -3,20 +3,22 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   ListTodo,
-  Users,
+  Users as UsersIcon,
   Settings,
   LogOut,
 } from 'lucide-react';
+import { useRole } from '../hooks/useRole';
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/tasks', label: 'Tasks', icon: ListTodo },
-  { to: '/users', label: 'Users', icon: Users },
+  { to: '/users', label: 'Users', icon: UsersIcon, roles: ['administrator'] },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
 const Sidebar: React.FC = () => {
   const [open, setOpen] = useState(false);
+  const role = useRole();
 
   return (
     <div
@@ -31,7 +33,9 @@ const Sidebar: React.FC = () => {
         ☰
       </button>
       <nav className="mt-6 space-y-1">
-        {navItems.map(({ to, label, icon: Icon }) => (
+        {navItems
+          .filter(item => !item.roles || item.roles.includes(role || ''))
+          .map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
@@ -46,7 +50,13 @@ const Sidebar: React.FC = () => {
             {open && <span>{label}</span>}
           </NavLink>
         ))}
-        <button className="flex items-center gap-2 px-4 py-2 text-body hover:bg-gray-200 dark:hover:bg-boxdark-2 w-full">
+        <button
+          className="flex items-center gap-2 px-4 py-2 text-body hover:bg-gray-200 dark:hover:bg-boxdark-2 w-full"
+          onClick={() => {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+          }}
+        >
           <LogOut size={20} />
           {open && <span>Logout</span>}
         </button>
