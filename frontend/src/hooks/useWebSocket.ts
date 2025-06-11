@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import APP_CONFIG from '../config';
 
-export function useWebSocket(onMessage: () => void) {
+export function useWebSocket(onMessage: (data: any) => void) {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
@@ -9,7 +9,12 @@ export function useWebSocket(onMessage: () => void) {
 
     ws.onopen = () => setConnected(true);
     ws.onmessage = (event) => {
-      if (event.data === 'reload') onMessage();
+      try {
+        const data = JSON.parse(event.data);
+        onMessage(data);
+      } catch (err) {
+        if (event.data === 'reload') onMessage('reload');
+      }
     };
     ws.onerror = (error) => console.error('WebSocket Error:', error);
     ws.onclose = () => setConnected(false);
