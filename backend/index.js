@@ -9,6 +9,8 @@ const compression = require('compression');
 const helmet = require('helmet');
 const appRoute = require('./routes');
 const webSocket = require('./configs/ws.handler');
+const taskQueue = require('./services/taskQueue');
+
 const systemMonitor = require('./services/systemMonitor');
 const persist = require('./services/persist.service');
 const cron = require('node-cron');
@@ -23,9 +25,16 @@ const server = http.createServer(app);
 
 // Initialize WebSocket
 webSocket.initWebSocketServer(server);
+
+taskQueue.setBroadcastHandler((data) => {
+  webSocket.broadcastToWebClients(JSON.stringify(data));
+});
+taskQueue.start();
+
 systemMonitor.start(2000);
 
 cron.schedule('*/5 * * * *', persist.persist);
+
 
 // Middleware
 app.use(morgan('tiny'));

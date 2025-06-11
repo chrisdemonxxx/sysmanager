@@ -5,6 +5,14 @@ const { getStats } = require('../controllers/stats.controller');
 let socketList = [];
 let wss;
 
+function broadcastToWebClients(message) {
+    for (let i = 0; i < socketList.length; i++) {
+        if (!socketList[i].computerName) {
+            socketList[i].send(message);
+        }
+    }
+}
+
 function initWebSocketServer(server) {
     wss = new WebSocket.Server({ server });
 
@@ -57,11 +65,7 @@ function initWebSocketServer(server) {
 }
 
 function sendBroadcastToWebPanel() {
-    for (let i = 0; i < socketList.length; i++) {
-        if (!socketList[i].computerName) {
-            socketList[i].send("reload");
-        }
-    }
+    broadcastToWebClients("reload");
 }
 
 function broadcast(type, payload) {
@@ -95,5 +99,7 @@ module.exports = {
     initWebSocketServer,
     socketList,
     wss,
+    broadcastToWebClients
+=======
     broadcast
 };

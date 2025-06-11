@@ -13,3 +13,16 @@ export interface TransferModalProps {
   onClose: () => void;
   commandOptions: string[];
 }
+
+export interface Task {
+  id: string;
+  name: string;
+  command: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  stdout?: string;
+  stderr?: string;
+  exitCode?: number | null;
+  createdAt: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+}

@@ -1,8 +1,32 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import request from './axios';
 import { useWebSocket } from './hooks/useWebSocket';
 import TransferModal from './components/TransferModal';
 import UserTable from './components/UserTable';
+
+import TaskTable from './components/TaskTable';
+import { UserInfo, Task } from './types/types';
+
+export default function App() {
+  const [tableData, setTableData] = useState<UserInfo[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [modalStatus, setModalStatus] = useState(false);
+  const [user, setUser] = useState<UserInfo>({
+    computerName: 'N/A',
+    ipAddress: 'N/A',
+    country: 'N/A',
+    status: 'N/A',
+    lastActiveTime: 'N/A',
+    additionalSystemDetails: 'N/A',
+  });
+
+  const getUserList = async () => {
+    try {
+      const response = await request({
+        url: 'get-user-list',
+        method: 'POST',
+      });
+
 import SystemAnalytics from './components/SystemAnalytics';
 import { UserInfo } from './types/types';
 
@@ -14,10 +38,46 @@ import Tasks from './pages/Tasks';
 import Logs from './pages/Logs';
 
 
+
+
+      setTableData(filtered);
+    } catch (error) {
+      console.error('Failed to fetch users', error);
+    }
+  };
+
+  const fetchTasks = async () => {
+    try {
+      const res = await request({ url: 'tasks', method: 'GET' });
+      setTasks(res.data.tasks ?? []);
+    } catch (e) {
+      console.error('Failed to fetch tasks', e);
+    }
+  };
+
+  const cancelTask = async (id: string) => {
+    await request({ url: `tasks/${id}/cancel`, method: 'PATCH' });
+  };
+
+  const connected = useWebSocket((data: any) => {
+    if (data === 'reload') {
+      getUserList();
+    }
+    if (data?.type === 'task_update') {
+      fetchTasks();
+    }
+  });
+
+  React.useEffect(() => {
+    getUserList();
+    fetchTasks();
+  }, []);
+
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const token = localStorage.getItem('token');
   return token ? children : <Navigate to="/login" replace />;
 }
+
 
 export default function App() {
   return (
@@ -40,6 +100,8 @@ export default function App() {
           console.log('[SEND]', user, type, script)
         }
       />
+      <h2 className="text-xl font-bold mb-4 mt-6">Tasks</h2>
+      <TaskTable tasks={tasks} onCancel={cancelTask} />
     </div>
 
     <Routes>
