@@ -5,6 +5,7 @@ import Tasks from './pages/Tasks';
 import Users from './pages/Users';
 import Settings from './pages/Settings';
 import Clients from './pages/Clients';
+import ConnectedDevices from './pages/ConnectedDevices';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="users" element={<Users />} />
         <Route path="settings" element={<Settings />} />
         <Route path="clients" element={<Clients />} />
+        <Route path="devices" element={<ConnectedDevices />} />
       </Route>
     </Routes>
 =======
