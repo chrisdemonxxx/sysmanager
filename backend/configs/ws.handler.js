@@ -137,5 +137,5 @@ module.exports = {
     wss,
     broadcastToWebClients,
     broadcast,
-    sendToClient
+    sendToClient // Resolved conflict: included sendToClient
 };
