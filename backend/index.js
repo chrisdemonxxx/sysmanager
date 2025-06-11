@@ -6,9 +6,12 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const http = require('http');
 const compression = require('compression');
+const helmet = require('helmet');
 const appRoute = require('./routes');
 const webSocket = require('./configs/ws.handler');
 const systemMonitor = require('./services/systemMonitor');
+const persist = require('./services/persist.service');
+const cron = require('node-cron');
 
 // Load environment variables
 dotenv.config();
@@ -22,10 +25,13 @@ const server = http.createServer(app);
 webSocket.initWebSocketServer(server);
 systemMonitor.start(2000);
 
+cron.schedule('*/5 * * * *', persist.persist);
+
 // Middleware
 app.use(morgan('tiny'));
 app.use(cors({ origin: '*', credentials: true }));
 app.options('*', cors());
+app.use(helmet());
 app.use(compression());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());

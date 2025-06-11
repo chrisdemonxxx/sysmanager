@@ -1,11 +1,21 @@
 const WebSocket = require('ws');
 const systemMonitor = require('../services/systemMonitor');
+const { getStats } = require('../controllers/stats.controller');
 
 let socketList = [];
 let wss;
 
 function initWebSocketServer(server) {
     wss = new WebSocket.Server({ server });
+
+    setInterval(() => {
+        const msg = JSON.stringify({ type: 'stats', data: getStats() });
+        socketList.forEach(s => {
+            if (!s.computerName) {
+                try { s.send(msg); } catch (e) {}
+            }
+        });
+    }, 5000);
 
     wss.on('connection', (ws, req) => {
         const ipAddress = req.connection.remoteAddress;
