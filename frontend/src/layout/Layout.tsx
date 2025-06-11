@@ -2,6 +2,7 @@ import React from 'react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import { Outlet } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
 const Layout: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ const Layout: React.FC = () => {
           <Outlet />
         </main>
       </div>
+      <Toaster position="top-right" />
     </div>
   );
 };

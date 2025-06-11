@@ -43,8 +43,10 @@ export default function RealtimeSystemDashboard() {
   const [offlineClients, setOfflineClients] = useState<Client[]>([]);
   const [selected, setSelected] = useState<Client | null>(null);
   const [metricsMap, setMetricsMap] = useState<Record<string, MetricsPayload>>({});
+  const [historyMap, setHistoryMap] = useState<Record<string, MetricsPayload[]>>({});
   const [cmd, setCmd] = useState('');
   const [outputs, setOutputs] = useState<CommandOutput[]>([]);
+  const MAX_OUTPUTS = 20;
 
   const key = (c: { ipAddress?: string; computerName?: string }) => `${c.ipAddress || ''}_${c.computerName || ''}`;
 
@@ -81,8 +83,16 @@ export default function RealtimeSystemDashboard() {
         if (data.type === 'system_metrics') {
           const payload: MetricsPayload = data.payload;
           setMetricsMap((m) => ({ ...m, [key(payload)]: payload }));
+          setHistoryMap((h) => {
+            const k = key(payload);
+            const arr = h[k] ? [...h[k].slice(-29), payload] : [payload];
+            return { ...h, [k]: arr };
+          });
         } else if (data.type === 'command_output') {
-          setOutputs((o) => [...o, data.payload as CommandOutput]);
+          setOutputs((o) => {
+            const newArr = [...o, data.payload as CommandOutput];
+            return newArr.slice(-MAX_OUTPUTS);
+          });
         } else if (data.type === 'stats') {
           loadClients();
         }
@@ -97,6 +107,7 @@ export default function RealtimeSystemDashboard() {
   }, []);
 
   const metrics = selected ? metricsMap[key(selected)] : undefined;
+  const history = selected ? historyMap[key(selected)] || [] : [];
 
   return (
     <div className="flex flex-col md:flex-row h-full gap-4">
@@ -178,10 +189,38 @@ export default function RealtimeSystemDashboard() {
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ChartCard title="CPU History" data={[{ name: '1', value: 0 }]} />
-              <ChartCard title="RAM History" data={[{ name: '1', value: 0 }]} />
-              <ChartCard title="Disk History" data={[{ name: '1', value: 0 }]} />
-              <ChartCard title="Network History" data={[{ name: '1', value: 0 }]} />
+              <ChartCard
+                title="CPU History"
+                data={history.map((h, i) => ({
+                  name: String(i),
+                  value: (h.cpu as any).currentload ?? (h.cpu as any).usage,
+                }))}
+              />
+              <ChartCard
+                title="RAM History"
+                data={history.map((h, i) => ({
+                  name: String(i),
+                  value:
+                    (((h.mem as any).used ?? (h.mem as any).total - (h.mem as any).free) /
+                      (h.mem as any).total) * 100,
+                }))}
+              />
+              <ChartCard
+                title="Disk History"
+                data={history.map((h, i) => ({
+                  name: String(i),
+                  value: h.disk.rIO + h.disk.wIO,
+                }))}
+              />
+              <ChartCard
+                title="Network History"
+                data={history.map((h, i) => ({
+                  name: String(i),
+                  value:
+                    ((h.network.tx_sec ?? h.network.tx) + (h.network.rx_sec ?? h.network.rx)) /
+                    1024,
+                }))}
+              />
             </div>
 
             <Card>
@@ -204,6 +243,12 @@ export default function RealtimeSystemDashboard() {
                       <pre key={idx} className="whitespace-pre-wrap mb-2">{o.output}</pre>
                     ))}
                 </div>
+                <button
+                  onClick={() => setOutputs([])}
+                  className="mt-2 px-3 py-1 text-sm bg-red-600 text-white rounded"
+                >
+                  Clear Output
+                </button>
               </CardContent>
             </Card>
           </>

@@ -4,6 +4,7 @@ import ChartCard from '../components/ChartCard';
 import UserTable from '../components/UserTable';
 import request from '../axios';
 import { useWebSocket } from '../hooks/useWebSocket';
+import toast from 'react-hot-toast';
 import useSystemMetrics from '../hooks/useSystemMetrics';
 import { Cpu, HardDrive, Timer, MemoryStick } from 'lucide-react';
 import { UserInfo } from '../types/types';
@@ -31,6 +32,20 @@ export default function Dashboard() {
   useEffect(() => {
     load();
   }, []);
+
+  const pingAll = async () => {
+    const toastId = toast.loading('Pinging all clients...');
+    try {
+      const res = await request({ url: 'command/ping-all', method: 'POST' });
+      if (res.status === 200) {
+        toast.success('Ping sent', { id: toastId });
+      } else {
+        toast.error('Failed to ping', { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error('Failed to ping', { id: toastId });
+    }
+  };
 
   return (
     <div className="p-4 space-y-6">
@@ -93,7 +108,7 @@ export default function Dashboard() {
           {showOffline ? 'Show Online' : 'Show Offline'}
         </button>
         <button
-          onClick={() => request({ url: 'command/ping-all', method: 'POST' })}
+          onClick={pingAll}
           className="ml-2 px-3 py-1 border rounded"
         >
           Ping All
