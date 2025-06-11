@@ -1,7 +1,7 @@
 const os = require('os');
-const fs = require('fs');
+const si = require('systeminformation');
 
-function getStats() {
+async function getStats() {
   const freeMem = os.freemem();
   const totalMem = os.totalmem();
   const cpus = os.cpus();
@@ -9,16 +9,22 @@ function getStats() {
     const total = Object.values(cpu.times).reduce((t, n) => t + n, 0);
     return acc + (1 - cpu.times.idle / total);
   }, 0) / cpus.length;
-  const disk = fs.statSync('/');
+  const fsInfo = await si.fsSize();
+  const diskInfo = fsInfo[0] || { free: 0, size: 0 };
   return {
     memory: { free: freeMem, total: totalMem },
     cpu: { load: cpuLoad },
-    disk: { free: disk.blocksFree, total: disk.blocks }
+    disk: { free: diskInfo.size - diskInfo.used, total: diskInfo.size }
   };
 }
 
 exports.getStatsAction = (req, res) => {
-  res.json({ status: 'success', data: getStats() });
+  getStats()
+    .then(data => res.json({ status: 'success', data }))
+    .catch(err => {
+      console.error('Failed to collect stats', err);
+      res.status(500).json({ status: 'error', message: 'Failed to collect stats' });
+    });
 };
 
 module.exports.getStats = getStats;

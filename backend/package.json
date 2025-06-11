@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon ./index.js",
-    "test": "echo \"No tests\""
+    "test": "jest"
   },
   "license": "ISC",
   "dependencies": {
@@ -24,5 +24,9 @@
     "screenshot-desktop": "^1.14.0",
     "systeminformation": "^5.27.1",
     "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "jest": "^30.0.0",
+    "supertest": "^7.1.1"
   }
 }

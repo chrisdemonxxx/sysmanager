@@ -5,6 +5,7 @@ interface RequestOptions {
   url: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   data?: Record<string, any> | FormData;
+  params?: Record<string, any>;
   headers?: Record<string, string>;
 }
 
@@ -12,6 +13,7 @@ const request = async ({
   url,
   method,
   data,
+  params,
   headers,
 }: RequestOptions): Promise<AxiosResponse> => {
   const config: AxiosRequestConfig = {
@@ -34,6 +36,10 @@ const request = async ({
       config.data = JSON.stringify(data);
       config.headers['Content-Type'] = 'application/json';
     }
+  }
+
+  if (params) {
+    config.params = params;
   }
 
   try {
