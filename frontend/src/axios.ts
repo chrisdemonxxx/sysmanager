@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import APP_CONFIG from './config';
+import toast from 'react-hot-toast';
 
 interface RequestOptions {
   url: string;
@@ -47,6 +48,7 @@ const request = async ({
     return response;
   } catch (error: any) {
     console.error('[API ERROR]', error?.response?.data || error.message);
+    toast.error(error?.response?.data?.message || 'Request failed');
     throw error;
   }
 };
