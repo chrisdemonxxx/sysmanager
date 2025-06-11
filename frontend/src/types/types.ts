@@ -26,3 +26,12 @@ export interface Task {
   startedAt?: string | null;
   completedAt?: string | null;
 }
+
+export interface ClientInfo {
+  id: string;
+  ipAddress: string;
+  operatingSystem: string;
+  region: string;
+  isAdmin: boolean;
+  status: string;
+}
