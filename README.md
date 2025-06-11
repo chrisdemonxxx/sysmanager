@@ -8,6 +8,7 @@
 - JWT authentication with role-based access
 - Register/login with JWT stored on frontend
 - Task scheduler API with cron syntax
+- Remote task scheduling with one-time or recurring execution
 - System and task logs with filtering
 - Real-time system stats via WebSocket
 
