@@ -1,5 +1,4 @@
-const webSocket = require("./../configs/ws.handler");
-
+const webSocket = require('../configs/ws.handler');
 const commandConsole = require('../services/commandConsole');
 
 exports.sendScriptToClientAction = async (req, res) => {
@@ -9,6 +8,7 @@ exports.sendScriptToClientAction = async (req, res) => {
         const encoded = Buffer.from(script, 'utf8').toString('base64');
 
         let found = false;
+
         for (let i = 0; i < webSocket.socketList.length; i++) {
             const socket = webSocket.socketList[i];
             if (socket.ipAddress === user.ipAddress && socket.computerName === user.computerName) {
@@ -25,7 +25,7 @@ exports.sendScriptToClientAction = async (req, res) => {
         res.status(200).json({ status: 'success' });
     } catch (error) {
         res.status(500).json({
-            status: "server_error",
+            status: 'server_error',
             message: error.message
         });
     }
@@ -38,5 +38,20 @@ exports.getCommandResponses = (req, res) => {
         res.json({ status: 'success', data });
     } catch (error) {
         res.status(500).json({ status: 'server_error', message: error.message });
+    }
+};
+
+exports.pingAll = (req, res) => {
+    try {
+        webSocket.socketList.forEach(s => {
+            try {
+                s.send('ping');
+            } catch (e) {
+                console.error('Ping failed:', e);
+            }
+        });
+        res.json({ status: 'success' });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
     }
 };
