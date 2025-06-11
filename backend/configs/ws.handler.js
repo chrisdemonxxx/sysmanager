@@ -3,6 +3,7 @@ const systemMonitor = require('../services/systemMonitor');
 const { getStats } = require('../controllers/stats.controller');
 
 let socketList = [];
+let offlineClients = [];
 let wss;
 
 function broadcastToWebClients(message) {
@@ -11,6 +12,11 @@ function broadcastToWebClients(message) {
             socketList[i].send(message);
         }
     }
+}
+
+function purgeOffline() {
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    offlineClients = offlineClients.filter(c => new Date(c.lastActiveTime).getTime() >= cutoff);
 }
 
 function initWebSocketServer(server) {
@@ -49,16 +55,22 @@ function initWebSocketServer(server) {
         ws.on('close', () => {
             for (let i = 0; i < socketList.length; i++) {
                 if (socketList[i] === ws) {
-                    socketList.splice(i, 1);  // Remove the socket from the array
-                    break;  // Exit loop once the socket is found and removed
+                    socketList.splice(i, 1);
+                    break;
                 }
             }
-
+            offlineClients.push({
+                ipAddress: ws.ipAddress,
+                computerName: ws.computerName,
+                lastActiveTime: ws.lastActiveTime
+            });
+            purgeOffline();
             sendBroadcastToWebPanel();
         });
     });
 
     console.log('WebSocket server initialized');
+    setInterval(purgeOffline, 60 * 60 * 1000);
     systemMonitor.subscribe((data) => {
         broadcast('system_metrics', data);
     });
@@ -79,6 +91,7 @@ function broadcast(type, payload) {
 }
 
 function handleClientMessage(ws, messageBuffer) {
+    ws.lastActiveTime = new Date();
     const decoder = new TextDecoder('utf-8');
     const stringMessage = decoder.decode(messageBuffer);
 
@@ -98,8 +111,8 @@ function handleClientMessage(ws, messageBuffer) {
 module.exports = {
     initWebSocketServer,
     socketList,
+    offlineClients,
     wss,
-    broadcastToWebClients
-=======
+    broadcastToWebClients,
     broadcast
 };
